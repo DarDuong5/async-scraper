@@ -2,9 +2,8 @@ from enum import StrEnum
 from dataclasses import dataclass, field
 from typing import Mapping, NamedTuple, Any
 from itertools import count
-import random
 
-_id_counter = count(1)
+_id_counter = count(1) 
 def generate_id() -> int:
     return next(_id_counter)
 
