@@ -47,9 +47,6 @@ Elapsed: 0.3952s
 ## Project structure
 Relevant files:
 ```
-context.py # Defines Context with the shared resources semaphore, process pool, and HTTP client passed to handlers.
-handlers.py # Any new and existing job handlers goes here.
-job.py # Job and JobResult defined here.
 main.py # Entry point that runs the program.
 runner.py # The engine -- worker pool, job queue, dispatch loop, and result collection.
 registry.py # @register decorator and job handler dispatch table.
