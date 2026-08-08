@@ -3,7 +3,7 @@ from concurrent import futures
 from typing import TypeAlias
 import time
 import sys
-import tqdm
+import httpx
 
 from context import Context
 from job import Job, JobResult, Status
@@ -45,13 +45,14 @@ async def main() -> None:
     results: ResultQueue = asyncio.Queue()
     num_workers = 5
     with futures.ProcessPoolExecutor() as pool:
-        semaphore = asyncio.Semaphore(10)
-        context: Context = Context(semaphore, pool)
-        enqueue_jobs(jobs)
-        enqueue_sentinels(num_workers, jobs)
-        tasks = [asyncio.create_task(worker(jobs, results, context))
-                 for _ in range(num_workers)]
-        await asyncio.gather(*tasks)
+        async with httpx.AsyncClient(timeout=3.1, follow_redirects=True) as client:
+            semaphore = asyncio.Semaphore(10)
+            context: Context = Context(semaphore, pool, client)
+            enqueue_jobs(jobs)
+            enqueue_sentinels(num_workers, jobs)
+            tasks = [asyncio.create_task(worker(jobs, results, context))
+                    for _ in range(num_workers)]
+            await asyncio.gather(*tasks)
     elapsed = time.perf_counter() - start
     report(num_workers, results, elapsed)
 
