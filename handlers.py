@@ -3,7 +3,7 @@ from typing import Mapping
 import bs4 
 
 from context import Context
-from registry_handler import register
+from registry import register
 
 def parse_html(html: str) -> Mapping:
     soup = bs4.BeautifulSoup(html, 'html.parser')

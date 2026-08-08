@@ -7,10 +7,6 @@ SAMPLE_JOBS = [
     {"job_type": "scrape", "payload": {"url": "http://books.toscrape.com/catalogue/page-4.html"}},
     {"job_type": "scrape", "payload": {"url": "http://books.toscrape.com/catalogue/page-5.html"}},
 
-    # process jobs — still work as-is (CPU-bound factorials)
-    {"job_type": "process", "payload": {"n": 80000}},
-    {"job_type": "process", "payload": {"n": 90000}},
-
     # deliberate failures — test the error path with real HTTP
     {"job_type": "scrape", "payload": {"url": "http://books.toscrape.com/catalogue/page-9999.html"}},  # 404
     {"job_type": "scrape", "payload": {}},                          # missing "url" → KeyError
