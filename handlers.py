@@ -1,27 +1,25 @@
 import asyncio
 from typing import Mapping
-import httpx
-
+import bs4 
 
 from context import Context
 from registry_handler import register
 
-def factorial(n: int) -> int: # not recursive due to Python's recursion max depth limit :P
-    res = 1
-    for i in range(n, 1, -1):
-        res *= i
-    return len(str(res))
-
+def parse_html(html: str) -> Mapping:
+    soup = bs4.BeautifulSoup(html, 'html.parser')
+    book_to_price = {}
+    for pod in soup.select('article.product_pod'):
+        title = pod.select_one('h3 a')['title']
+        price = pod.select_one('p.price_color').text.strip()
+        book_to_price[title] = price
+    return book_to_price 
+    
 @register('scrape')
-async def handle_scrape(payload: Mapping, context: Context) -> int:
+async def handle_scrape(payload: Mapping, context: Context) -> Mapping:
     url = payload['url']
     async with context.semaphore:
         resp = await context.client.get(url)
         resp.raise_for_status()
-        return len(resp.text)
-        
-@register('process')
-async def handle_process(payload: Mapping, context: Context) -> int:
-    n = payload['n']
+        html = resp.text
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(context.pool, factorial, n)
+    return await loop.run_in_executor(context.pool, parse_html, html)
