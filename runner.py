@@ -7,7 +7,7 @@ import httpx
 
 from context import Context
 from job import Job, JobResult, Status
-from registry_handler import JOB_HANDLERS
+from registry import JOB_HANDLERS
 import handlers # imported because the register decorators needs to be ran, iykyk
 from samples import SAMPLE_JOBS
 
@@ -52,7 +52,7 @@ async def main() -> None:
             enqueue_sentinels(num_workers, jobs)
             tasks = [asyncio.create_task(worker(jobs, results, context))
                     for _ in range(num_workers)]
-            await asyncio.gather(*tasks)
+            await asyncio.gather(*tasks, return_exceptions=True)
     elapsed = time.perf_counter() - start
     report(num_workers, results, elapsed)
 
