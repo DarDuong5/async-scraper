@@ -4,17 +4,20 @@ from contextlib import asynccontextmanager
 import asyncio
 from concurrent import futures
 import httpx
+from sqlalchemy.orm import Session
 
 from job import Job, Status
 from runner import worker
 from context import Context
+from database import get_session, engine, Base, JobTable
 
 # Lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create database
+    Base.metadata.create_all(engine)
     # Create the context first once started
     app.state.job_queue = asyncio.Queue()
-    app.state.result_queue = asyncio.Queue()
     num_workers = 5
     num_semaphore = 10
     with futures.ProcessPoolExecutor() as pool:
@@ -22,9 +25,7 @@ async def lifespan(app: FastAPI):
             semaphore = asyncio.Semaphore(num_semaphore)
             app.state.context = Context(semaphore, pool, client)
             # Then spawn the workers
-            workers = [asyncio.create_task(worker(app.state.job_queue, 
-                                                  app.state.result_queue, 
-                                                  app.state.context))
+            workers = [asyncio.create_task(worker(app.state.job_queue, app.state.context))
                        for _ in range(num_workers)]
             yield # App runs
             # Cancel the workers after shutdown
@@ -40,11 +41,23 @@ class JobBase(BaseModel):
     payload: dict
 
 @app.post('/jobs')
-def upload_job(job_base: JobBase, request: Request):
-    job = Job(job_base.job_type, Status.PENDING, payload=job_base.payload)
-    request.app.state.job_queue.put_nowait(job)
+async def upload_job(job_base: JobBase, 
+               request: Request, 
+               session: Session = Depends(get_session)):
+    # Create a database row
+    job_row = JobTable(job_type=job_base.job_type, status=Status.PENDING, payload=job_base.payload)
+    session.add(job_row)
+    session.commit()
+    session.refresh(job_row)
+    # Enqueue the job onto the job queue
+    job = Job(job_type=job_row.job_type, status=job_row.status, id=job_row.id, payload=job_row.payload)
+    await request.app.state.job_queue.put(job)
     return {'id': job.id, 'job_type': job.job_type, 'status': job.status, 'payload': job.payload}
 
 @app.get('/jobs/{id}')
-def fetch_job(id: int):
-    ...
+def fetch_job(id: int, session: Session = Depends(get_session)):
+    job_row = session.get(JobTable, id)
+    if job_row is None:
+        return {'Error': 'Given ID does not exist.'}
+    return {'status': job_row.status, 'value': job_row.value, 'error': job_row.error}
+

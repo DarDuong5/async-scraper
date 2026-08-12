@@ -52,3 +52,6 @@ htmlcov/
 
 # Miscs
 .miscs
+
+# Database files
+jobs.db
