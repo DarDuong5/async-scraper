@@ -11,7 +11,7 @@ Async Scraper separates *what work is done* and *how it's scheduled*. Jobs are s
 - **Hybrid concurrency** - Fetching URLs is I/O-bound handled by coroutines, and parsing HTML is CPU-bound handled by a process pool.
 - **Bounded concurrency** - Limits the number of coroutines that can be executed concurrently at a time, without flooding the server.
 - **Error isolation** - When a job fails, it gets recorded without crashing the program, allowing the worker to still run as well as the others.
-- **Graceful shutdown** - Using sentinels tells a worker that there's no more work to do, so it stops cleanly.
+- [TODO]
 
 ## Architecture
 [TODO]
@@ -34,32 +34,35 @@ Run:
 python3 main.py
 ```
 
-Sample Output:
-```
-ID: 1 | Status: done | Value: {'A Light in the Attic': '£51.77', 'Tipping the Velvet': '£53.74', ...}
-ID: 6 | Status: failed | Value: None | Error: Client error '404 Not Found' ...
-...
-Successes: 5
-Failures: 4
-Elapsed: 0.3952s
-```
+Creating Job Sample Input:
+![alt text](pics/fastapi_create_job_sample_input.png)
+
+Creating Job Sample Output:
+![alt text](pics/fastapi_create_job_sample_output.png)
+
+Fetching Job Sample Input:
+![alt text](pics/fastapi_fetch_job_sample_input.png)
+
+Fetching Job Sample Output:
+![alt text](pics/fastapi_fetch_job_sample_output.png)
 
 ## Project structure
 Relevant files:
 ```
 main.py # Entry point that runs the program.
-runner.py # The engine -- worker pool, job queue, dispatch loop, and result collection.
+app.py # FastAPI: create and fetch jobs through POST and GET requests while updating database, the engine lives here now.
+database.py # SQLAlchemy: JobTable inside of database and get_session for Depends().
+worker.py # This is where the worker does dispatch loop, and result collection.
 registry.py # @register decorator and job handler dispatch table.
 handlers.py # Any new and existing job handlers goes here.
 context.py # The Context bundling semaphore, process pool, and HTTP client to get passed to handlers.
-job.py # Job and JobResult defined here.
-samples.py # Example jobs for putting into the queue.
+job.py # Job defined here.
 ```
 
 ## Roadmap
 - Stage 1: In-memory - DONE
-- Stage 2: FastAPI and SQLAlchemy - IN-PROGRESS
-- Stage 3: Redis, Docker, and AWS - NOT YET STARTED 
+- Stage 2: FastAPI and SQLAlchemy - DONE
+- Stage 3: Redis, Docker, and AWS - IN PROGRESS
 
 ## License
 MIT.

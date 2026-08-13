@@ -7,7 +7,7 @@ import httpx
 from sqlalchemy.orm import Session
 
 from job import Job, Status
-from runner import worker
+from worker import worker
 from context import Context
 from database import get_session, engine, Base, JobTable
 

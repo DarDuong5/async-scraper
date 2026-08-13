@@ -6,7 +6,6 @@ from context import Context
 from job import Job, Status
 from registry import JOB_HANDLERS
 import handlers # imported because the register decorators needs to be ran, iykyk
-from samples import SAMPLE_JOBS
 from database import engine, JobTable
 
 JobQueue: TypeAlias = asyncio.Queue[Job]
