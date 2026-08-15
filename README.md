@@ -30,17 +30,15 @@ When the worker is finished and produces a result, the database will get updated
 
 The app and the workers will shutdown once the user ends the program, which frees all of the resources. 
 
-``` 
-    End user makes a request          Semaphore
-            |                            ^ 
-            |                            |
-            V                            | 
-    +----> FastAPI ----> Job Queue --> Workers ----> Process Pool
-    |         |                          |
-    |         |                          |
-    |         |                          |
-    |         V                          |
-    <---- Database <---------------------+
+``` mermaid
+graph TD
+    A[User] -->|POST / GET| API[FastAPI]
+    API --> |enqueue| Queue[Job Queue]
+    API <--> |write pending / read status| DB[Database]
+    Queue --> |pull job| Workers
+    Workers --> |write result| DB
+    Workers -.uses.-> Sem[Semaphore]
+    Workers -.uses.-> ProcPool[Process Pool]
 ```
 
 ## Setup
