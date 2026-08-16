@@ -3,6 +3,7 @@ from typing import Mapping
 import bs4 
 
 from context import Context
+from httpx import AsyncClient
 from registry import register
 
 def parse_html(html: str) -> Mapping:
@@ -14,12 +15,9 @@ def parse_html(html: str) -> Mapping:
         book_to_price[title] = price
     return book_to_price 
     
-@register('scrape')
-async def handle_scrape(payload: Mapping, context: Context) -> Mapping:
+async def handle_scrape(payload: Mapping, client: AsyncClient) -> Mapping:
     url = payload['url']
-    async with context.semaphore:
-        resp = await context.client.get(url)
-        resp.raise_for_status()
-        html = resp.text
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(context.pool, parse_html, html)
+    resp = await client.get(url)
+    resp.raise_for_status()
+    html = resp.text
+    return parse_html(html)
