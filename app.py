@@ -1,39 +1,10 @@
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel
-from contextlib import asynccontextmanager
-import asyncio
-from concurrent import futures
-import httpx
 from sqlalchemy.orm import Session
 
-from job import Job, Status
-from worker import worker
-from context import Context
-from database import get_session, engine, Base, JobTable
+from job import Status
+from database import get_session, JobTable
 from tasks import work
-
-# Lifespan
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Create database
-    Base.metadata.create_all(engine)
-    # Create the context first once started
-    app.state.job_queue = asyncio.Queue()
-    num_workers = 5
-    num_semaphore = 10
-    with futures.ProcessPoolExecutor() as pool:
-        async with httpx.AsyncClient(timeout=3.1, follow_redirects=True) as client:
-            semaphore = asyncio.Semaphore(num_semaphore)
-            app.state.context = Context(semaphore, pool, client)
-            # Then spawn the workers
-            workers = [asyncio.create_task(worker(app.state.job_queue, app.state.context))
-                       for _ in range(num_workers)]
-            yield # App runs
-            # Cancel the workers after shutdown
-            for w in workers:
-                w.cancel()
-            await asyncio.gather(*workers, return_exceptions=True)
-        # Release the resources after workers are cancelled here
 
 app = FastAPI()
 

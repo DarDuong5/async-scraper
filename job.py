@@ -1,6 +1,6 @@
 from enum import StrEnum
 from dataclasses import dataclass, field
-from typing import Mapping, NamedTuple, Any
+from typing import Mapping
 
 class Status(StrEnum):
     PENDING = 'pending'

@@ -20,6 +20,7 @@ def get_session():
     with Session(engine) as session:
         yield session
 
+Base.metadata.create_all(engine)
 
 
 

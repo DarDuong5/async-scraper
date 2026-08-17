@@ -1,10 +1,7 @@
-import asyncio
 from typing import Mapping
 import bs4 
 
-from context import Context
 from httpx import AsyncClient
-from registry import register
 
 def parse_html(html: str) -> Mapping:
     soup = bs4.BeautifulSoup(html, 'html.parser')

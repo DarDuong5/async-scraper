@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from job import Status
 from database import JobTable, engine
 
-
 @app.task
 def work(job_id: int, payload: Mapping):
     with Session(engine) as session:
