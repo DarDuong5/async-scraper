@@ -42,7 +42,7 @@ graph TD
 ```
 
 ## Setup
-Requires Python 3.11+.
+Requires Python 3.11+ and ensure you have Docker.
 ```
 # Create and activate a virtual environment
 python -m venv .venv
@@ -54,10 +54,23 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-Run:
+First, run:
+```
+docker run -d -p 6379:6379 redis
+```
+This runs in the background using the port of Redis.
+
+Next, in a new terminal, run:
+```
+celery -A celery_app worker
+```
+This creates a pool of workers ready to execute any tasks with Redis.
+
+Finally, with the other terminal, run:
 ```
 python3 main.py
 ```
+Go to `http://localhost:8000/docs` to create and fetch jobs.
 
 Creating Job Sample Input:
 ![alt text](pics/fastapi_create_job_sample_input.png)
