@@ -10,6 +10,7 @@ from job import Job, Status
 from worker import worker
 from context import Context
 from database import get_session, engine, Base, JobTable
+from tasks import work
 
 # Lifespan
 @asynccontextmanager
@@ -34,7 +35,7 @@ async def lifespan(app: FastAPI):
             await asyncio.gather(*workers, return_exceptions=True)
         # Release the resources after workers are cancelled here
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 class JobBase(BaseModel):
     job_type: str
@@ -42,17 +43,14 @@ class JobBase(BaseModel):
 
 @app.post('/jobs')
 async def upload_job(job_base: JobBase, 
-               request: Request, 
                session: Session = Depends(get_session)):
     # Create a database row
     job_row = JobTable(job_type=job_base.job_type, status=Status.PENDING, payload=job_base.payload)
     session.add(job_row)
     session.commit()
     session.refresh(job_row)
-    # Enqueue the job onto the job queue
-    job = Job(job_type=job_row.job_type, status=job_row.status, id=job_row.id, payload=job_row.payload)
-    await request.app.state.job_queue.put(job)
-    return {'id': job.id, 'job_type': job.job_type, 'status': job.status, 'payload': job.payload}
+    work.delay(job_row.id, job_row.payload)
+    return {'id': job_row.id, 'job_type': job_row.job_type, 'status': job_row.status, 'payload': job_row.payload}
 
 @app.get('/jobs/{id}')
 def fetch_job(id: int, session: Session = Depends(get_session)):
