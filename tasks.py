@@ -1,6 +1,5 @@
 from celery_app import app
 from handlers import handle_scrape
-from typing import Mapping
 import asyncio
 import httpx
 from sqlalchemy.orm import Session
@@ -9,7 +8,7 @@ from job import Status
 from database import JobTable, engine
 
 @app.task(queue='fetch')
-def fetch(job_id: int, payload: Mapping):
+def fetch(job_id: int, url: str):
     with Session(engine) as session:
         job_row = session.get(JobTable, job_id)
         if job_row is None:
@@ -19,7 +18,7 @@ def fetch(job_id: int, payload: Mapping):
 
     async def run():
         async with httpx.AsyncClient(timeout=3.1, follow_redirects=True) as client:
-            return await handle_scrape(payload, client)
+            return await handle_scrape(url, client)
 
     try:
         result = asyncio.run(run())
@@ -36,6 +35,6 @@ def fetch(job_id: int, payload: Mapping):
         job_row.error = error
         session.commit()
 
-@app.task(queue='parse')
-def parse():
-    ...
+# @app.task(queue='parse')
+# def parse():
+#     ...

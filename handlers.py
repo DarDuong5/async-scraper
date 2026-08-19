@@ -12,8 +12,7 @@ def parse_html(html: str) -> Mapping:
         book_to_price[title] = price
     return book_to_price 
     
-async def handle_scrape(payload: Mapping, client: AsyncClient) -> Mapping:
-    url = payload['url']
+async def handle_scrape(url: str, client: AsyncClient) -> Mapping:
     resp = await client.get(url)
     resp.raise_for_status()
     html = resp.text

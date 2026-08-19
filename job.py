@@ -10,7 +10,6 @@ class Status(StrEnum):
 
 @dataclass
 class Job:
-    job_type: str
     status: Status
     id: int
     payload: Mapping = field(default_factory=dict)  

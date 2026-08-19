@@ -10,9 +10,8 @@ class Base(DeclarativeBase):
 class JobTable(Base):
     __tablename__ = 'job_table'
     id: Mapped[int] = mapped_column(primary_key=True)
-    job_type: Mapped[str] = mapped_column(String)
     status: Mapped[str] = mapped_column(String, default='pending')
-    payload: Mapped[dict] = mapped_column(JSON)
+    url: Mapped[str] = mapped_column(String)
     value: Mapped[dict | None] = mapped_column(JSON, nullable=True, default=True)
     error: Mapped[str | None] = mapped_column(String, nullable=True, default=True)
 
