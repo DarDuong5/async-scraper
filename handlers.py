@@ -1,5 +1,6 @@
 from typing import Mapping
 import bs4 
+from asyncio import Semaphore
 
 from httpx import AsyncClient
 
@@ -12,8 +13,8 @@ def parse_html(html: str) -> Mapping:
         book_to_price[title] = price
     return book_to_price 
     
-async def handle_scrape(url: str, client: AsyncClient) -> Mapping:
-    resp = await client.get(url)
-    resp.raise_for_status()
-    html = resp.text
-    return parse_html(html)
+async def handle_scrape(url: str, client: AsyncClient, semaphore: Semaphore) -> str:
+    async with semaphore:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        return resp.text

@@ -19,8 +19,7 @@ async def upload_job(urls: list[str], session: Session = Depends(get_session)):
     session.add_all(rows)
     session.commit()
 
-    for row in rows:
-        fetch.delay(row.id, row.url)
+    fetch.delay([(row.id, row.url) for row in rows])
 
     return rows
 
