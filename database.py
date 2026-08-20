@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy import create_engine, String, JSON
 
-engine = create_engine('sqlite:///./jobs.db', echo=True)
+engine = create_engine('sqlite:///./jobs.db', echo=False)
 session_local = sessionmaker(bind=engine)
 
 class Base(DeclarativeBase):

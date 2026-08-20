@@ -1,7 +1,6 @@
 from typing import Mapping
 import bs4 
 from asyncio import Semaphore
-
 from httpx import AsyncClient
 
 def parse_html(html: str) -> Mapping:

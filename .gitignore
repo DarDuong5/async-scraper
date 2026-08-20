@@ -55,3 +55,6 @@ htmlcov/
 
 # Database files
 jobs.db
+
+# Benchmark 
+.benchmark/

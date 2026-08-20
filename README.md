@@ -95,8 +95,8 @@ celery_app.py # Celery app is defined here and used across modules.
 - Stage 3: 
     - Phase A: Celery + Redis
         - Phase A-1: Simple Concurrency (one Celery pool) - DONE
-        - Phase A-2: Concurrency Optimization (two Celery pools) - IN PROGRESS
-    - Phase B: Docker and composing containers - NOT YET STARTED
+        - Phase A-2: Concurrency Optimization (two Celery pools) - DONE
+    - Phase B: Postgres + Docker and composing containers - IN PROGRESS
     - Phase C: Host it (AWS) - NOT YET STARTED
 
 ## License
