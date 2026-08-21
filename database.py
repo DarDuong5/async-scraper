@@ -1,8 +1,15 @@
 from sqlalchemy.orm import Session, DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy import create_engine, String, JSON
+from sqlalchemy.pool import NullPool
+import os
 
-engine = create_engine('sqlite:///./jobs.db', echo=False)
-session_local = sessionmaker(bind=engine)
+DB_URL = os.environ.get(
+    'DATABASE_URL',
+    'postgresql+psycopg://scraper:scraperpass@localhost:5433/scraperdb'
+)
+
+engine = create_engine(DB_URL, poolclass=NullPool)
+session_local = sessionmaker(bind=engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
@@ -20,7 +27,7 @@ def get_session():
         yield session
 
 Base.metadata.create_all(engine)
-
+print(DB_URL)
 
 
 
